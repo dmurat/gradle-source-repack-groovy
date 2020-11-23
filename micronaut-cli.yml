@@ -1,0 +1,6 @@
+applicationType: cli
+defaultPackage: org.klokwrk.tools.gradle.source.repack
+testFramework: spock
+sourceLanguage: groovy
+buildTool: gradle
+features: [annotation-api, app-name, gradle, groovy, http-client, logback, picocli, picocli-groovy-application, picocli-spock, properties, readme, shade, spock]

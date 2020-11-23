@@ -1,0 +1,32 @@
+Thumbs.db
+.DS_Store
+.gradle
+build/
+out/
+target/
+!gradle/wrapper/gradle-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea/
+.run/
+*.iws
+*.iml
+*.ipr
+*.log
+*.zip
+*.sha256
+
+### NetBeans ###
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+**/bin

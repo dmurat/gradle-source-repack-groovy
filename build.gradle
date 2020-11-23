@@ -1,0 +1,43 @@
+plugins {
+  id("groovy")
+  id("com.github.johnrengelman.shadow") version "6.1.0"
+  id("io.micronaut.application") version "1.2.0"
+}
+
+version "0.1.0"
+group "org.klokwrk.tools"
+
+repositories {
+  mavenCentral()
+  jcenter()
+}
+
+micronaut {
+  testRuntime("spock2")
+  processing {
+    incremental(true)
+    annotations("org.klokwrk.tools.gradle.source.repack.*")
+  }
+}
+
+dependencies {
+  compileOnly("info.picocli:picocli-codegen:4.2.0")
+
+  implementation("info.picocli:picocli")
+  implementation("io.micronaut:micronaut-validation")
+  implementation("io.micronaut:micronaut-http-client")
+  implementation("io.micronaut.groovy:micronaut-runtime-groovy")
+  implementation("io.micronaut.picocli:micronaut-picocli")
+  implementation("javax.annotation:javax.annotation-api")
+
+  runtimeOnly("ch.qos.logback:logback-classic")
+}
+
+application {
+  mainClass.set("org.klokwrk.tools.gradle.source.repack.GradleSourceRepackCommand")
+}
+
+java {
+  sourceCompatibility = JavaVersion.toVersion("11")
+  targetCompatibility = JavaVersion.toVersion("11")
+}

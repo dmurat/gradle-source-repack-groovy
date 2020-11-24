@@ -1,0 +1,98 @@
+package org.klokwrk.tools.gradle.source.repack
+
+import groovy.transform.CompileStatic
+import groovy.transform.ToString
+import org.klokwrk.tools.gradle.source.repack.constants.Constants
+
+import java.nio.file.Files
+import java.nio.file.Path
+
+/**
+ * Encapsulates supported CLI options.
+ * <p/>
+ * After picocli finishes with parsing configured CLI options, it is expected to supply them into an instance of this class for easier communication with other interested classes.
+ * <p/>
+ * Only required option is Gradle version. All other options are initialized to defaults that can be changed via setters.
+ */
+@ToString(includeNames = true)
+@CompileStatic
+class GradleSourceRepackCliArguments {
+  private final String gradleVersion
+
+  /**
+   * Gradle distribution type to use.
+   * <p/>
+   * Used for calculating Gradle distribution archive name for download. It defaults to {@link Constants#GRADLE_DISTRIBUTION_TYPE_DEFAULT}.
+   */
+  String gradleDistributionType
+
+  /**
+   * Extension of downloadable Gradle distribution archive name.
+   * <p/>
+   * It defaults to {@link Constants#GRADLE_DISTRIBUTION_FILE_EXTENSION_DEFAULT}.
+   */
+  String gradleDistributionFileExtension
+
+  /**
+   * URL of the site where downloadable Gradle distribution archive resides.
+   * <p/>
+   * It defaults to {@link Constants#GRADLE_DISTRIBUTION_SITE_URL_DEFAULT}
+   */
+  String gradleDistributionSiteUrl
+
+  /**
+   * Directory into which Gradle distribution archive will be downloaded.
+   * <p/>
+   * It defaults to {@link Constants#DOWNLOAD_TARGET_DIR_DEFAULT}.
+   */
+  String downloadTargetDir
+
+  /**
+   * The file name of the archive into which Gradle sources will be repacked.
+   * <p/>
+   * It defaults to {@code gradle-api-${ this.gradleVersion }-sources.jar }
+   */
+  String gradleApiSourcesFileName
+
+  /**
+   * The directory where repacked archive will be placed.
+   * <p/>
+   * If directory {@code ~/.gradle/caches/${ this.gradleVersion }/generated-gradle-jars} exists, it will be used. Otherwise, {@code downloadTargetDir} is used.
+   */
+  String gradleApiDirName
+
+  /**
+   * Indicates if downloaded resources should be deleted after repacking finishes.
+   */
+  Boolean performCleanup
+
+  GradleSourceRepackCliArguments(String gradleVersion) {
+    this.gradleVersion = gradleVersion
+
+    this.gradleDistributionType = Constants.GRADLE_DISTRIBUTION_TYPE_DEFAULT
+    this.gradleDistributionFileExtension = Constants.GRADLE_DISTRIBUTION_FILE_EXTENSION_DEFAULT
+    this.gradleDistributionSiteUrl = Constants.GRADLE_DISTRIBUTION_SITE_URL_DEFAULT
+    this.downloadTargetDir = Constants.DOWNLOAD_TARGET_DIR_DEFAULT
+
+    this.gradleApiSourcesFileName = "gradle-api-${ this.gradleVersion }-sources.jar"
+
+    // If default target directory for repacking does not exist, repack into a directory where gradle distribution was downloaded.
+    String gradleApiDirNameToCheck = "${ System.getProperty("user.home") }/.gradle/caches/${ this.gradleVersion }/generated-gradle-jars"
+    if (Files.exists(Path.of(gradleApiDirNameToCheck))) {
+      this.gradleApiDirName = gradleApiDirNameToCheck
+    }
+    else {
+      this.gradleApiDirName = downloadTargetDir
+    }
+
+    // Behavior modifiers
+    this.performCleanup = true
+  }
+
+  /**
+   * Gradle version whose sources will be downloaded and repacked.
+   */
+  String getGradleVersion() {
+    return gradleVersion
+  }
+}

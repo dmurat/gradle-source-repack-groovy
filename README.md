@@ -12,7 +12,8 @@ java -agentlib:native-image-agent=config-output-dir=build/native-image-configura
 - Command executed from root project directory for creating GraalVM native image in `build/native-image` directory.
 ```
 mkdir -p build/native-image && \
-native-image --class-path build/libs/gradle-source-repack-groovy-0.1.0-all.jar \
+native-image --verbose \
+--class-path build/libs/gradle-source-repack-groovy-0.1.0-all.jar:build/libs/graal-native-image-compile-dependencies.jar \
 --allow-incomplete-classpath \
 --report-unsupported-elements-at-runtime \
 --initialize-at-build-time \

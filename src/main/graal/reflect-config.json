@@ -1,9 +1,2 @@
 [
-  {
-    "name":"org.klokwrk.tools.gradle.source.repack.GradleSourceRepackCommand",
-    "allDeclaredFields":true,
-    "allDeclaredMethods":true,
-    "allPublicMethods":true,
-    "allDeclaredConstructors":true
-  }
 ]

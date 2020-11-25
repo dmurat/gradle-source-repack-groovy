@@ -20,11 +20,21 @@ micronaut {
   }
 }
 
+application {
+  mainClass.set("org.klokwrk.tools.gradle.source.repack.GradleSourceRepackCommand")
+}
+
+java {
+  sourceCompatibility = JavaVersion.toVersion("11")
+  targetCompatibility = JavaVersion.toVersion("11")
+}
+
 dependencies {
   implementation platform("org.codehaus.groovy:groovy-bom:3.0.6")
 
   compileOnly("info.picocli:picocli-codegen:4.2.0")
   compileOnly("org.graalvm.nativeimage:svm")
+  compileOnly("io.github.classgraph:classgraph:4.8.90")
 
   implementation("info.picocli:picocli")
   implementation("io.micronaut:micronaut-validation")
@@ -36,11 +46,16 @@ dependencies {
   runtimeOnly("ch.qos.logback:logback-classic")
 }
 
-application {
-  mainClass.set("org.klokwrk.tools.gradle.source.repack.GradleSourceRepackCommand")
+/**
+ * Native image compiler needs to have a reference to classes implementing org.graalvm.nativeimage.hosted.Feature.
+ * In our case, our custom org.graalvm.nativeimage.hosted.Feature classes rely on 'classgraph' library.
+ * As we don't want to have 'classgraph' library in an executable jar, we are creating another shadow jar from compileOnly configuration.
+ * That new jar needs to be supplied to 'native-image' command via '--class-path' parameter.
+ */
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+task graalNativeImageCompileDependenciesShadowJar(type: ShadowJar) {
+  archiveFileName = "graal-native-image-compile-dependencies.jar"
+  configurations = [project.configurations.compileClasspath]
 }
 
-java {
-  sourceCompatibility = JavaVersion.toVersion("11")
-  targetCompatibility = JavaVersion.toVersion("11")
-}
+tasks.assemble.dependsOn tasks.graalNativeImageCompileDependenciesShadowJar

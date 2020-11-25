@@ -3,6 +3,7 @@ package org.klokwrk.tools.gradle.source.repack
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
 import org.klokwrk.tools.gradle.source.repack.constants.Constants
+import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloaderInfo
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -94,5 +95,12 @@ class GradleSourceRepackCliArguments {
    */
   String getGradleVersion() {
     return gradleVersion
+  }
+
+  GradleDownloaderInfo toGradleDownloaderInfoForDistributionZip() {
+    return new GradleDownloaderInfo(
+        gradleVersion: gradleVersion, gradleDistributionType: gradleDistributionType, gradleDistributionFileExtension: gradleDistributionFileExtension, downloadSiteUrl: gradleDistributionSiteUrl,
+        downloadTargetDir: downloadTargetDir
+    )
   }
 }

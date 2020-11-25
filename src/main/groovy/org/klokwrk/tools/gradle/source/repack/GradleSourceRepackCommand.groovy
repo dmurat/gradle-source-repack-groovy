@@ -5,6 +5,8 @@ import groovy.util.logging.Slf4j
 import io.micronaut.configuration.picocli.PicocliRunner
 import io.micronaut.logging.LogLevel
 import io.micronaut.logging.LoggingSystem
+import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloader
+import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloaderInfo
 import picocli.CommandLine.Command
 import picocli.CommandLine.Help.Visibility
 import picocli.CommandLine.Model.CommandSpec
@@ -60,6 +62,9 @@ class GradleSourceRepackCommand implements Runnable {
   @Inject
   LoggingSystem loggingSystem
 
+  @Inject
+  GradleDownloader gradleDownloader
+
   static void main(String[] args) throws Exception {
     PicocliRunner.run(GradleSourceRepackCommand, args)
   }
@@ -79,6 +84,33 @@ class GradleSourceRepackCommand implements Runnable {
     cliArguments.performCleanup = cliOptionCleanup
     log.debug "cliArguments: $cliArguments"
 
+    File gradleDistributionZipFile = fetchGradleDistributionZipFile(cliArguments, gradleDownloader)
+
+    if (cliArguments.performCleanup) {
+      cleanDownloadedFiles([gradleDistributionZipFile])
+    }
+
     log.debug "Finished."
+  }
+
+  private static File fetchGradleDistributionZipFile(GradleSourceRepackCliArguments cliArguments, GradleDownloader gradleDownloader) {
+    GradleDownloaderInfo gradleDownloaderZipInfo = cliArguments.toGradleDownloaderInfoForDistributionZip()
+
+    File gradleDistributionZipFile = new File(gradleDownloaderZipInfo.downloadTargetFileAbsolutePath)
+    if (gradleDistributionZipFile.exists()) {
+      log.debug "Using already existing Gradle distribution ZIP file '${ gradleDistributionZipFile.absolutePath }'."
+    }
+    else {
+      log.debug "Starting download of Gradle distribution ZIP file."
+      gradleDistributionZipFile = gradleDownloader.download(gradleDownloaderZipInfo)
+    }
+
+    return gradleDistributionZipFile
+  }
+
+  private static void cleanDownloadedFiles(List<File> fileListToDelete) {
+    log.debug "Deleting downloaded files: ${ fileListToDelete }"
+
+    fileListToDelete.each (File file) -> file.delete()
   }
 }

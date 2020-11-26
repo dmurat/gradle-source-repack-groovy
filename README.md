@@ -1,4 +1,14 @@
-## Running application
+# Introduction
+This little tool aims to ease the debugging of Gradle internals inside IDEA.
+
+We can include `runtimeOnly gradleApi()` dependency in a build script to get a hold on Gradle's internal classes. However, we cannot easily attach sources to them.
+
+The main problem is that Gradle sources are archived in a distribution zip in multiple source roots, which IDEA can not understand. The solution is to repack Gradle sources under a single root in an
+archive and provide that archive to IDEA via the "Attach sources" command.
+
+`gradle-source-repack` utility can prepare such an archive.
+
+## Running command via JVM
 All commands should be executed from project root.
 
 ```
@@ -35,7 +45,7 @@ java -agentlib:native-image-agent=config-output-dir=build/native-image-configura
 ./build/libs/gradle-source-repack-groovy-0.1.0-all.jar -h
 ```
 
-## Running native image
+## Running command as native image
 ```
 ./build/native-image/gradle-source-repack-groovy --root-log-level=INFO --log-level=DEBUG --cleanup=true 6.7.1
 ```

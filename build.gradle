@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
   id("groovy")
   id("com.github.johnrengelman.shadow") version "6.1.0"
@@ -29,7 +31,6 @@ java {
   targetCompatibility = JavaVersion.toVersion("11")
 }
 
-import org.apache.tools.ant.filters.ReplaceTokens
 processResources {
   filteringCharset = "UTF-8"
 
@@ -37,8 +38,14 @@ processResources {
   filter(ReplaceTokens, tokens: [moduleName: project.name, moduleVersion: project.version])
 }
 
+configurations {
+  graalNativeImageDependencies
+}
+
 dependencies {
   implementation platform("org.codehaus.groovy:groovy-bom:3.0.6")
+
+  graalNativeImageDependencies("io.github.classgraph:classgraph:4.8.90")
 
   compileOnly("info.picocli:picocli-codegen:4.2.0")
   compileOnly("org.graalvm.nativeimage:svm")
@@ -55,15 +62,14 @@ dependencies {
 }
 
 /**
- * Native image compiler needs to have a reference to classes implementing org.graalvm.nativeimage.hosted.Feature.
+ * Native image compiler needs to have a reference to classes used for implementation of org.graalvm.nativeimage.hosted.Feature.
  * In our case, our custom org.graalvm.nativeimage.hosted.Feature classes rely on 'classgraph' library.
- * As we don't want to have 'classgraph' library in an executable jar, we are creating another shadow jar from compileOnly configuration.
- * That new jar needs to be supplied to 'native-image' command via '--class-path' parameter.
+ * As we don't want to have 'classgraph' library in an executable jar, copying dependency into "build/native-image-dependencies" directory.
+ * All those copied dependencies need to be provided into 'native-image' command via '--class-path' parameter.
  */
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-task graalNativeImageCompileDependenciesShadowJar(type: ShadowJar) {
-  archiveFileName = "graal-native-image-compile-dependencies.jar"
-  configurations = [project.configurations.compileClasspath]
+task copyGradleNativeImageDependencies(type: Copy) {
+  from configurations.graalNativeImageDependencies
+  into "${ buildDir }/native-image-dependencies/"
 }
 
-tasks.assemble.dependsOn tasks.graalNativeImageCompileDependenciesShadowJar
+tasks.assemble.dependsOn tasks.copyGradleNativeImageDependencies

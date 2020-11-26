@@ -13,7 +13,7 @@ java -jar ./build/libs/gradle-source-repack-groovy-0.1.0-all.jar --root-log-leve
 ```
 mkdir -p build/native-image && \
 native-image --verbose \
---class-path build/libs/gradle-source-repack-groovy-0.1.0-all.jar:build/libs/graal-native-image-compile-dependencies.jar \
+--class-path build/libs/gradle-source-repack-groovy-0.1.0-all.jar:build/native-image-dependencies/classgraph-4.8.90.jar \
 --allow-incomplete-classpath \
 --report-unsupported-elements-at-runtime \
 --initialize-at-build-time \

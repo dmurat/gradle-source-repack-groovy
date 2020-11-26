@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import groovy.transform.ToString
 import org.klokwrk.tools.gradle.source.repack.constants.Constants
 import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloaderInfo
+import org.klokwrk.tools.gradle.source.repack.repackager.GradleSourceRepackagerInfo
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -97,6 +98,10 @@ class GradleSourceRepackCliArguments {
     return gradleVersion
   }
 
+  String getGradleApiSourcesFilePath() {
+    return getGradleApiDirName() + "/" + getGradleApiSourcesFileName()
+  }
+
   /**
    * Factory method for creating {@code GradleDownloaderInfo} for main Gradle distribution ZIP file.
    */
@@ -109,5 +114,12 @@ class GradleSourceRepackCliArguments {
    */
   GradleDownloaderInfo toGradleDownloaderInfoForDistributionZipSha256File() {
     return new GradleDownloaderInfo(gradleVersion, gradleDistributionType, "${ gradleDistributionFileExtension }.sha256", gradleDistributionSiteUrl, downloadTargetDir)
+  }
+
+  /**
+   * Factory method for creating {@code GradleSourceRepackagerInfo}.
+   */
+  GradleSourceRepackagerInfo toGradleSourceRepackagerInfo(String gradleDistributionZipFilePath) {
+    return new GradleSourceRepackagerInfo(gradleDistributionZipFilePath, getGradleVersion(), getGradleApiSourcesFilePath(), getGradleApiDirName())
   }
 }

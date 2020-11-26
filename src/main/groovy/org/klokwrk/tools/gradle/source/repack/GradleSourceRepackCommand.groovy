@@ -9,6 +9,7 @@ import org.klokwrk.tools.gradle.source.repack.checksum.GradleSha256CheckInfo
 import org.klokwrk.tools.gradle.source.repack.checksum.GradleSha256Checker
 import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloader
 import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloaderInfo
+import org.klokwrk.tools.gradle.source.repack.repackager.GradleSourceRepackager
 import picocli.CommandLine.Command
 import picocli.CommandLine.Help.Visibility
 import picocli.CommandLine.Model.CommandSpec
@@ -97,6 +98,8 @@ class GradleSourceRepackCommand implements Runnable {
       String message = "SHA-256 does not match [fetched: ${ gradleSha256CheckInfo.fetchedSha256 }, calculated: ${ gradleSha256CheckInfo.calculatedSha256 }]. Cannot continue."
       throw new IllegalStateException(message)
     }
+
+    GradleSourceRepackager.repackGradleSource(cliArguments.toGradleSourceRepackagerInfo(gradleDistributionZipFile.absolutePath))
 
     if (cliArguments.performCleanup) {
       cleanDownloadedFiles([gradleDistributionZipFile, gradleDistributionZipSha256File])

@@ -5,6 +5,8 @@ import groovy.util.logging.Slf4j
 import io.micronaut.configuration.picocli.PicocliRunner
 import io.micronaut.logging.LogLevel
 import io.micronaut.logging.LoggingSystem
+import org.klokwrk.tools.gradle.source.repack.checksum.GradleSha256CheckInfo
+import org.klokwrk.tools.gradle.source.repack.checksum.GradleSha256Checker
 import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloader
 import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloaderInfo
 import picocli.CommandLine.Command
@@ -87,6 +89,15 @@ class GradleSourceRepackCommand implements Runnable {
     File gradleDistributionZipFile = fetchGradleDistributionZipFile(cliArguments, gradleDownloader)
     File gradleDistributionZipSha256File = fetchGradleDistributionZipSha256File(cliArguments, gradleDownloader)
 
+    GradleSha256CheckInfo gradleSha256CheckInfo = GradleSha256Checker.checkSha256(gradleDistributionZipSha256File, gradleDistributionZipFile)
+    if (gradleSha256CheckInfo.isMatch()) {
+      println "SHA-256 checksum OK."
+    }
+    else {
+      String message = "SHA-256 does not match [fetched: ${ gradleSha256CheckInfo.fetchedSha256 }, calculated: ${ gradleSha256CheckInfo.calculatedSha256 }]. Cannot continue."
+      throw new IllegalStateException(message)
+    }
+
     if (cliArguments.performCleanup) {
       cleanDownloadedFiles([gradleDistributionZipFile, gradleDistributionZipSha256File])
     }
@@ -126,7 +137,6 @@ class GradleSourceRepackCommand implements Runnable {
 
   private static void cleanDownloadedFiles(List<File> fileListToDelete) {
     log.debug "Deleting downloaded files: ${ fileListToDelete }"
-
     fileListToDelete.each (File file) -> file.delete()
   }
 }

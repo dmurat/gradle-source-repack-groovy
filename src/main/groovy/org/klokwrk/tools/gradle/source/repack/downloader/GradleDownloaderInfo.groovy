@@ -3,6 +3,9 @@ package org.klokwrk.tools.gradle.source.repack.downloader
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 
+/**
+ * Encapsulates data needed for downloading Gradle distribution or helper files.
+ */
 @Immutable(includeNames = true)
 @CompileStatic
 class GradleDownloaderInfo {

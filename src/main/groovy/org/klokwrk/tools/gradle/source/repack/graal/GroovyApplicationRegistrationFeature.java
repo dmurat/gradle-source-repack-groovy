@@ -20,13 +20,13 @@ public class GroovyApplicationRegistrationFeature implements Feature {
 
     ClassGraph gradleSourceRepackClassGraph = new ClassGraph()
         .enableClassInfo()
+        .enableMethodInfo()
         .enableAnnotationInfo()
         .acceptPackages(gradleSourceRepackPackage);
 
     try (ScanResult scanResult = gradleSourceRepackClassGraph.scan()) {
       registerGeneratedClosureClasses(scanResult);
-      registerImmutableClasses(scanResult);
-      registerPicocliClasses(scanResult);
+      registerClassesWithGeneratedMethods(scanResult);
     }
   }
 
@@ -42,18 +42,10 @@ public class GroovyApplicationRegistrationFeature implements Feature {
   }
 
   /**
-   * Registers Groovy immutable classes with Graal native image compiler.
+   * Registers all classes that Groovy enhances with generated methods.
    */
-  public static void registerImmutableClasses(ScanResult scanResult) {
-    ClassInfoList groovyImmutableClassInfoList = scanResult.getClassesWithAnnotation("groovy.transform.KnownImmutable");
-    RegistrationFeatureUtils.registerClasses(groovyImmutableClassInfoList);
-  }
-
-  /**
-   * Registers Groovy picocli classes with Graal native image compiler.
-   */
-  public static void registerPicocliClasses(ScanResult scanResult) {
-    ClassInfoList groovyPicocliClassInfoList = scanResult.getClassesWithAnnotation("picocli.CommandLine$Command");
-    RegistrationFeatureUtils.registerClasses(groovyPicocliClassInfoList);
+  public static void registerClassesWithGeneratedMethods(ScanResult scanResult) {
+    ClassInfoList generatedGroovyClosureClassInfoList = scanResult.getClassesWithMethodAnnotation("groovy.transform.Generated");
+    RegistrationFeatureUtils.registerClasses(generatedGroovyClosureClassInfoList);
   }
 }

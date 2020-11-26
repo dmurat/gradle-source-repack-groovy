@@ -29,6 +29,14 @@ java {
   targetCompatibility = JavaVersion.toVersion("11")
 }
 
+import org.apache.tools.ant.filters.ReplaceTokens
+processResources {
+  filteringCharset = "UTF-8"
+
+  // Processes resources/version.properties and replaces tokens with provided values.
+  filter(ReplaceTokens, tokens: [moduleName: project.name, moduleVersion: project.version])
+}
+
 dependencies {
   implementation platform("org.codehaus.groovy:groovy-bom:3.0.6")
 

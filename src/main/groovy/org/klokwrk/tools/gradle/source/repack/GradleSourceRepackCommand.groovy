@@ -7,6 +7,7 @@ import io.micronaut.logging.LogLevel
 import io.micronaut.logging.LoggingSystem
 import org.klokwrk.tools.gradle.source.repack.checksum.GradleSha256CheckInfo
 import org.klokwrk.tools.gradle.source.repack.checksum.GradleSha256Checker
+import org.klokwrk.tools.gradle.source.repack.cli.PropertiesVersionProvider
 import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloader
 import org.klokwrk.tools.gradle.source.repack.downloader.GradleDownloaderInfo
 import org.klokwrk.tools.gradle.source.repack.repackager.GradleSourceRepackager
@@ -24,7 +25,8 @@ import java.util.regex.Pattern
 @Command(
     name = "gradle-source-repack-groovy",
     description = "Downloads Gradle source distribution and repackages it in a JAR suitable to use for debugging Gradle internals in IDEA.",
-    mixinStandardHelpOptions = true
+    mixinStandardHelpOptions = true,
+    versionProvider = PropertiesVersionProvider
 )
 @Slf4j
 @CompileStatic

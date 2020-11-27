@@ -33,8 +33,9 @@ native-image --verbose \
 --no-server \
 -H:ConfigurationFileDirectories=src/main/graal/ \
 -H:+ReportExceptionStackTraces \
+-H:Path=build/native-image \
 org.klokwrk.tools.gradle.source.repack.GradleSourceRepackCommand \
-build/native-image/gradle-source-repack-groovy
+gradle-source-repack-groovy
 ```
 
 - Command executed from root project directory for generating GraalVM native-image metadata in `build/native-image-configuration` directory.

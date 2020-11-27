@@ -27,11 +27,11 @@ public class GroovyDefaultMethodsClassesRegistrationFeature implements Feature {
 
     try (ScanResult scanResult = groovyRuntimeClassGraph.scan()) {
       ClassInfoList defaultGroovyMethodClassInfoCandidateList = scanResult.getSubclasses("org.codehaus.groovy.reflection.GeneratedMetaMethod");
-      ClassInfoList filteredGroovyMethodClassInfoCandidateList =
+      ClassInfoList defaultGroovyMethodClassInfoFilteredList =
           defaultGroovyMethodClassInfoCandidateList
               .filter((ClassInfo defaultGroovyMethodClassInfoCandidate) -> defaultGroovyMethodClassInfoCandidate.getName().matches("^org.codehaus.groovy.runtime.dgm\\$[0-9]+$"));
 
-      RegistrationFeatureUtils.registerClasses(filteredGroovyMethodClassInfoCandidateList);
+      RegistrationFeatureUtils.registerClasses(defaultGroovyMethodClassInfoFilteredList);
     }
   }
 }

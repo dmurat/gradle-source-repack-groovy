@@ -1,4 +1,5 @@
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.internal.deprecation.DeprecatableConfiguration
 
 plugins {
   id("groovy")
@@ -16,6 +17,7 @@ repositories {
 
 micronaut {
   testRuntime("spock2")
+  enableNativeImage(false)
   processing {
     incremental(true)
     annotations("org.klokwrk.tools.gradle.source.repack.*")
@@ -61,15 +63,69 @@ dependencies {
   runtimeOnly("ch.qos.logback:logback-classic")
 }
 
-/**
- * Native image compiler needs to have a reference to classes used for implementation of org.graalvm.nativeimage.hosted.Feature.
- * In our case, our custom org.graalvm.nativeimage.hosted.Feature classes rely on 'classgraph' library.
- * As we don't want to have 'classgraph' library in an executable jar, copying dependency into "build/native-image-dependencies" directory.
- * All those copied dependencies need to be provided into 'native-image' command via '--class-path' parameter.
- */
-task copyGradleNativeImageDependencies(type: Copy) {
-  from configurations.graalNativeImageDependencies
-  into "${ buildDir }/native-image-dependencies/"
-}
+// Simple custom graal image builder task used because of some bugs in Micronaut task.
+// Can be replaced by Micronaut one when at least the first of the following bugs is fixed:
+// - https://github.com/micronaut-projects/micronaut-gradle-plugin/issues/92
+// - https://github.com/micronaut-projects/micronaut-gradle-plugin/issues/93
+//
+// In addition there is also an issue with missing resources in Micronaut task that causes native image build failing in the presence of both java and groovy source sets. Didn't reported that yet,
+// but I guess it will not get much attention since native image for Groovy is not supported.
+tasks.register("kwrkNativeImage", Exec) { Exec thisExecTask ->
+  String nativeImageBuilderClasspath = null
+  project.configurations { ConfigurationContainer configurationContainer ->
+    Set<Configuration> filteredConfigurations = configurationContainer
+        .findAll({ Configuration configuration ->
+          if (configuration instanceof DeprecatableConfiguration) {
+            DeprecatableConfiguration deprecatableConfiguration = (DeprecatableConfiguration) configuration
+            if (deprecatableConfiguration.resolutionAlternatives != null) {
+              return false
+            }
+          }
 
-tasks.assemble.dependsOn tasks.copyGradleNativeImageDependencies
+          return true
+        })
+        .findAll { Configuration configuration ->
+          return configuration.canBeResolved
+        }
+        .findAll({ Configuration configuration ->
+          return ["runtimeClasspath", "graalNativeImageDependencies"].contains(configuration.name)
+        })
+
+    Set<File> resolvedDependencies = filteredConfigurations.collectMany { Configuration configuration -> configuration.resolve() }
+
+    SourceSet mainSourceSet = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+    FileCollection outputDirs = mainSourceSet.getOutput().getClassesDirs().filter({ File file -> file.exists() })
+    File resourcesDir = mainSourceSet.getOutput().getResourcesDir()
+
+    //noinspection GroovyAssignabilityCheck
+    nativeImageBuilderClasspath = project.files(resolvedDependencies, outputDirs, resourcesDir).asPath
+
+    return
+  }
+
+  File workingDir = new File(project.buildDir, "native-image")
+  workingDir.mkdirs()
+
+  JavaApplication javaApplication = project.extensions.getByType(JavaApplication)
+  String mainClass = javaApplication.getMainClass().get()
+
+  File mainGraalSourceSetDir = new File(project.projectDir, "src/main/graal")
+
+  thisExecTask.setExecutable("native-image")
+  thisExecTask.setWorkingDir(workingDir)
+  thisExecTask.setArgs([
+      "--verbose",
+      "--class-path=$nativeImageBuilderClasspath",
+      "--allow-incomplete-classpath",
+      "--report-unsupported-elements-at-runtime",
+      "--initialize-at-build-time",
+      "--initialize-at-run-time=org.codehaus.groovy.control.XStreamUtils,groovy.grape.GrapeIvy",
+      "--no-fallback",
+      "--no-server",
+      "-H:ConfigurationFileDirectories=${ mainGraalSourceSetDir.absolutePath }",
+      "-H:+ReportExceptionStackTraces",
+      "-H:Path=${ workingDir.absolutePath }",
+      "-H:Class=${ mainClass }",
+      "-H:Name=${ project.name }"]
+  )
+}

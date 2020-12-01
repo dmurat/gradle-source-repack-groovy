@@ -18,8 +18,12 @@ java -jar ./build/libs/gradle-source-repack-groovy-0.1.0-all.jar --root-log-leve
 ```
 
 ## GraalVM native image compilation
-- Command executed from root project directory for creating GraalVM native image in `build/native-image` directory.
-  - It is assumed that **Groovy 3.0.6** is used.
+- Gradle task executed from root project directory for creating GraalVM native image in `build/native-image` directory.
+```
+./gradlew kwrkNativeImage
+```
+
+- native command executed from root project directory for creating GraalVM native image in `build/native-image` directory.
   - It is assumed that GraalVM 20.3.0.r11-grl and corresponding native-image tool are installed.
 ```
 mkdir -p build/native-image && \

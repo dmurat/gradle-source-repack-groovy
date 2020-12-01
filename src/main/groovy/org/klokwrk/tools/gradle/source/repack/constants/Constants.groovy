@@ -25,11 +25,4 @@ class Constants {
    * Default URL prefix to use for downloading Gradle distribution archive.
    */
   static final String GRADLE_DISTRIBUTION_SITE_URL_DEFAULT = "https://services.gradle.org/distributions/"
-
-  /**
-   * Default directory into which Gradle distribution archive will be downloaded.
-   * <p/>
-   * Value corresponds to the current working directory from which command is started.
-   */
-  static final String DOWNLOAD_TARGET_DIR_DEFAULT = System.getProperty("user.dir")
 }

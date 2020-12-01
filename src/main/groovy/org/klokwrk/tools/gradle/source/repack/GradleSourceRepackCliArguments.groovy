@@ -45,7 +45,7 @@ class GradleSourceRepackCliArguments {
   /**
    * Directory into which Gradle distribution archive will be downloaded.
    * <p/>
-   * It defaults to {@link Constants#DOWNLOAD_TARGET_DIR_DEFAULT}.
+   * It defaults to current working directory, meaning a directory from which command is started.
    */
   String downloadTargetDir
 
@@ -74,7 +74,7 @@ class GradleSourceRepackCliArguments {
     this.gradleDistributionType = Constants.GRADLE_DISTRIBUTION_TYPE_DEFAULT
     this.gradleDistributionFileExtension = Constants.GRADLE_DISTRIBUTION_FILE_EXTENSION_DEFAULT
     this.gradleDistributionSiteUrl = Constants.GRADLE_DISTRIBUTION_SITE_URL_DEFAULT
-    this.downloadTargetDir = Constants.DOWNLOAD_TARGET_DIR_DEFAULT
+    this.downloadTargetDir = System.getProperty("user.dir")
 
     this.gradleApiSourcesFileName = "gradle-api-${ this.gradleVersion }-sources.jar"
 

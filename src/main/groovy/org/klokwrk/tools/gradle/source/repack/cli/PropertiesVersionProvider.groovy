@@ -3,6 +3,11 @@ package org.klokwrk.tools.gradle.source.repack.cli
 import picocli.CommandLine.IVersionProvider
 import groovy.transform.CompileStatic
 
+/**
+ * Picocli version provider.
+ * <p/>
+ * Reads a version from {@code version.properties} file in classpath.
+ */
 @CompileStatic
 class PropertiesVersionProvider implements IVersionProvider {
   @Override
@@ -13,7 +18,9 @@ class PropertiesVersionProvider implements IVersionProvider {
     }
 
     Properties properties = new Properties()
-    properties.load(url.newInputStream())
+    url.newInputStream().withCloseable { BufferedInputStream bufferedInputStream ->
+      properties.load(bufferedInputStream)
+    }
 
     return ["${ properties["moduleName"] } ${ properties["moduleVersion"] }"] as String[]
   }
